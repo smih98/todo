@@ -110,8 +110,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
-
-  /todo/{id}/task/{id}:
     get:
       parameters:
         - in: path
@@ -136,6 +134,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
+  /todo/{id}/task/{id}:
     put:
       summary: Change name and status of task by id
       parameters:
@@ -159,7 +158,6 @@ paths:
             application/json:
               schema:
                 '$ref': "#/components/schemas/Task"
-
     delete:
       summary: Delete task by id
       parameters:
@@ -272,3 +270,4 @@ components:
           enum:
             - OPEN
             - CLOSED
+
