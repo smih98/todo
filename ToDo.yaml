@@ -1,24 +1,274 @@
 openapi: 3.0.0
 info:
-  title: Sample API
-  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
-  version: 0.1.9
-servers:
-  - url: http://api.example.com/v1
-    description: Optional server description, e.g. Main (production) server
-  - url: http://staging-api.example.com
-    description: Optional server description, e.g. Internal staging server for testing
+  version: 1.0.0
+  title: ToDo Application
+  description: This is my first todo app API Spec
+
+
 paths:
-  /users:
+  /todo:
     get:
-      summary: Returns a list of users.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Get me the list of todos
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - OPEN
+              - DONE
+          description: Get todos by status
+      tags: [ ToDo Functions]
       responses:
-        '200':    # status code
-          description: A JSON array of user names
+        "200":
+          description: This is success response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: "#/components/schemas/Todo"
+    post:
+      summary: Create new todo
+      tags: [ ToDo Functions ]
+      requestBody:
+        description: Required Name and Date
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTodo"
+      responses:
+        "200":
+          description: This is success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+  /todo/{id}:
+    put:
+      summary: Change the status, name, dueDate or color of todo by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the todo to  put
+      requestBody:
+        description: Change the status, name, dueDate or color of todo by id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditTodo"
+      tags: [ ToDo Functions ]
+      responses:
+        "200":
+          description: this is success response
+          content:
+            application/json:
+              schema:
+                '$ref': "#/components/schemas/Todo"
+    delete:
+      summary: Delete todo by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the todo to delete
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - OPEN
+              - DONE
+          description: Delete todos by status
+      tags: [ ToDo Functions ]
+      responses:
+        "204":
+          description: Deleted
+  /todo/{id}/task:
+    post:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to post
+      tags: [ Task Functions ]
+      requestBody:
+        description: New Task in Todo
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTask"
+      responses:
+        "200":
+          description: This is success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /todo/{id}/task/{id}:
+    get:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to get
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - OPEN
+              - DONE
+          description: Get tasks by status
+      tags: [ Task Functions ]
+      responses:
+        "200":
+          description: This is success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    put:
+      summary: Change name and status of task by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the todo to put
+      requestBody:
+        description: Change name and status of task by id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditTask"
+      tags: [ Task Functions ]
+      responses:
+        "200":
+          description: this is success response
+          content:
+            application/json:
+              schema:
+                '$ref': "#/components/schemas/Task"
+
+    delete:
+      summary: Delete task by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to delete
+      tags: [ Task Functions ]
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123
+        name:
+          type: string
+          example: Groceries
+        dueDate:
+          type: string
+          format: date
+        taskCount:
+          type: string
+          example: "2"
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+        color:
+          type: string
+          example:
+            name: Cosmos
+            hexCode: '#FFCCCC'
+    CreateTodo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Groceries
+        dueDate:
+          type: string
+          format: date
+        color:
+          type: string
+          example:
+            name: Cosmos
+            hexCode: '#FFCCCC'
+      required:
+        - name
+        - dueDate
+    EditTodo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Groceries
+        dueDate:
+          type: string
+          format: date
+        color:
+          type: string
+          example:
+            name: Cosmos
+            hexCode: '#FFCCCC'
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+      required:
+        - name
+        - dueDate
+
+    Task:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Apple
+        id:
+          type: integer
+          example: abc1
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+    CreateTask:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Apple
+    EditTask:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Groceries
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
