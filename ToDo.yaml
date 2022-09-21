@@ -17,6 +17,7 @@ paths:
             enum:
               - OPEN
               - DONE
+          required: true
           description: Get todos by status
       tags: [ ToDo Functions]
       responses:
@@ -25,7 +26,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Todo"
+                $ref: "#/components/schemas/TodoList"
+        default:
+          $ref: '#/components/responses/TodoError'
     post:
       summary: Create new todo
       tags: [ ToDo Functions ]
@@ -41,7 +44,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Todo"
+                $ref: "#/components/schemas/TodoList"
+        default:
+          $ref: '#/components/responses/CreateTodoError'
   /todo/{id}:
     put:
       summary: Change the status, name, dueDate or color of todo by id
@@ -65,7 +70,9 @@ paths:
           content:
             application/json:
               schema:
-                '$ref': "#/components/schemas/Todo"
+                '$ref': "#/components/schemas/TodoList"
+        default:
+          $ref: '#/components/responses/EditTodoError'
     delete:
       summary: Delete todo by id
       parameters:
@@ -75,18 +82,30 @@ paths:
             type: integer
           required: true
           description: Numeric ID of the todo to delete
-        - in: query
-          name: status
-          schema:
-            type: string
-            enum:
-              - OPEN
-              - DONE
-          description: Delete todos by status
       tags: [ ToDo Functions ]
       responses:
         "204":
           description: Deleted
+        default:
+          $ref: '#/components/responses/DeleteError'
+    get:
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of todo to get the task
+      tags: [ Task Functions ]
+      responses:
+        "200":
+          description: This is success response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoDetails"
+        default:
+          $ref: '#/components/responses/TaskError'
   /todo/{id}/task:
     post:
       parameters:
@@ -109,32 +128,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Task"
-    get:
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: Numeric ID of the task to get
-        - in: query
-          name: status
-          schema:
-            type: string
-            enum:
-              - OPEN
-              - DONE
-          description: Get tasks by status
-      tags: [ Task Functions ]
-      responses:
-        "200":
-          description: This is success response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Task"
-  /todo/{id}/task/{id}:
+                $ref: "#/components/schemas/TasksList"
+        default:
+          $ref: '#/components/responses/CreateTaskError'
+
+  /todo/{id}/task/{taskId}:
     put:
       summary: Change name and status of task by id
       parameters:
@@ -144,6 +142,13 @@ paths:
             type: integer
           required: true
           description: Numeric ID of the todo to put
+        - in: path
+          name: taskId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to put
+
       requestBody:
         description: Change name and status of task by id
         content:
@@ -157,7 +162,9 @@ paths:
           content:
             application/json:
               schema:
-                '$ref': "#/components/schemas/Task"
+                $ref: "#/components/schemas/TasksList"
+        default:
+          $ref: '#/components/responses/EditTaskError'
     delete:
       summary: Delete task by id
       parameters:
@@ -166,14 +173,26 @@ paths:
           schema:
             type: integer
           required: true
+          description: Numeric ID of the todo to delete
+        - in: path
+          name: taskId
+          schema:
+            type: integer
+          required: true
           description: Numeric ID of the task to delete
       tags: [ Task Functions ]
       responses:
         "204":
           description: Deleted
+        default:
+          $ref: '#/components/responses/DeleteError'
 
 components:
   schemas:
+    TodoList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Todo"
     Todo:
       type: object
       properties:
@@ -194,11 +213,46 @@ components:
           enum:
             - OPEN
             - CLOSED
-        color:
+      required:
+        - name
+        - dueDate
+        - id
+        - taskCount
+        - status
+        - color
+
+    TodoDetails:
+      type: object
+      properties:
+        id:
           type: string
-          example:
-            name: Cosmos
-            hexCode: '#FFCCCC'
+          example: 123
+        name:
+          type: string
+          example: Groceries
+        dueDate:
+          type: string
+          format: date
+        taskCount:
+          type: string
+          example: "2"
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+        tasksList:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+      required:
+        - name
+        - dueDate
+        - id
+        - taskCount
+        - status
+        - color
+
     CreateTodo:
       type: object
       properties:
@@ -209,10 +263,7 @@ components:
           type: string
           format: date
         color:
-          type: string
-          example:
-            name: Cosmos
-            hexCode: '#FFCCCC'
+          $ref: "#/components/schemas/Color"
       required:
         - name
         - dueDate
@@ -226,10 +277,7 @@ components:
           type: string
           format: date
         color:
-          type: string
-          example:
-            name: Cosmos
-            hexCode: '#FFCCCC'
+          $ref: "#/components/schemas/Color"
         status:
           type: string
           enum:
@@ -238,6 +286,11 @@ components:
       required:
         - name
         - dueDate
+        - id
+    TasksList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Task"
 
     Task:
       type: object
@@ -259,15 +312,179 @@ components:
         name:
           type: string
           example: Apple
+      required:
+        - name
     EditTask:
       type: object
       properties:
         name:
           type: string
-          example: Groceries
+          example: Apples
+        taskID:
+          type: integer
+          example: abc1
         status:
           type: string
           enum:
             - OPEN
             - CLOSED
+      required:
+        - name
+        - taskID
+    Color:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Cosmos
+        hexCode:
+          type: string
+          example: '#FFCCCC'
+
+    TodoAppApiError:
+      type: object
+      properties:
+        error:
+          type: string
+        scope:
+          type: string
+        description:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - error
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/TodoAppApiError"
+
+  responses:
+    TodoError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: SERVER_ERROR
+                description: Internal server error. Failed to load API.
+    CompletedTodoError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: ID_NOT_FOUND
+              - scope: id
+              - description: The provided ID is incorrect or does not exist.
+    CreateTodoError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: FIELD_MISSING
+                scope: dueDate
+                description: dueDate is missing.
+              - error: FIELD_MISSING
+                scope: name
+                description: Name is missing.
+              - error: FIELD_INVALID
+                scope: color
+                description: wrong color
+              - error: FIELD_INVALID
+                scope: status
+                description: Internal server error. Failed to load API.
+    EditTodoError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: FIELD_MISSING
+                scope: dueDate
+                description: dueDate is missing.
+              - error: FIELD_MISSING
+                scope: name
+                description: Name is missing.
+              - error: FIELD_INVALID
+                scope: color
+                description: wrong color
+              - error: ID_NOT_FOUND
+                scope: id
+                description: The provided ID is incorrect or does not exist.
+              - error: FIELD_INVALID
+                scope: status
+                description: wrong color
+    TaskError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: TASK_ID_NOT_FOUND
+                scope: id
+                description: The provided ID is incorrect or does not exist.
+              - error: SERVER_ERROR
+                description: Internal server error. Failed to load API.
+    CreateTaskError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: FIELD_MISSING
+                scope: name
+                description: Name is missing.
+              - error: FIELD_INVALID
+                scope: status
+                description: Invalid status of the task.
+    EditTaskError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: FIELD_MISSING
+                scope: name
+                description: Name is missing.
+              - error: ID_NOT_FOUND
+                scope: id
+                description: The provided ID is incorrect or does not exist.
+              - error: FIELD_INVALID
+                scope: status
+                description: Invalid status of the task.
+    DeleteError:
+      description: Defined possible errors, as error and scope pairs
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          example:
+            errors:
+              - error: ID_NOT_FOUND
+                scope: id
+                description: The provided ID is incorrect or does not exist.
+
+
+
 
