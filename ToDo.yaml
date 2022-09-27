@@ -131,6 +131,7 @@ paths:
                 $ref: "#/components/schemas/TasksList"
         default:
           $ref: '#/components/responses/CreateTaskError'
+  /todo/{id}/task/{taskId}:
     put:
       summary: Change name and status of task by id
       parameters:
@@ -163,7 +164,6 @@ paths:
                 $ref: "#/components/schemas/TasksList"
         default:
           $ref: '#/components/responses/EditTaskError'
-  /todo/{id}/task/{taskId}:
     delete:
       summary: Delete task by id
       parameters:
@@ -194,7 +194,7 @@ components:
         items:
           type: array
           items:
-        "$ref": "#/components/schemas/Todo"
+            "$ref": "#/components/schemas/Todo"
     Todo:
       type: object
       properties:
@@ -295,7 +295,7 @@ components:
         items:
           type: array
           items:
-          $ref: "#/components/schemas/Task"
+            $ref: "#/components/schemas/Task"
 
     Task:
       type: object
@@ -325,9 +325,6 @@ components:
         name:
           type: string
           example: Apples
-        taskID:
-          type: integer
-          example: abc1
         status:
           type: string
           enum:
@@ -335,7 +332,6 @@ components:
             - CLOSED
       required:
         - name
-        - taskID
     Color:
       type: object
       properties:
