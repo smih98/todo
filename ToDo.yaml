@@ -131,8 +131,6 @@ paths:
                 $ref: "#/components/schemas/TasksList"
         default:
           $ref: '#/components/responses/CreateTaskError'
-
-  /todo/{id}/task/{taskId}:
     put:
       summary: Change name and status of task by id
       parameters:
@@ -165,6 +163,7 @@ paths:
                 $ref: "#/components/schemas/TasksList"
         default:
           $ref: '#/components/responses/EditTaskError'
+  /todo/{id}/task/{taskId}:
     delete:
       summary: Delete task by id
       parameters:
@@ -190,9 +189,12 @@ paths:
 components:
   schemas:
     TodoList:
-      type: array
-      items:
-        $ref: "#/components/schemas/Todo"
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+        "$ref": "#/components/schemas/Todo"
     Todo:
       type: object
       properties:
@@ -288,9 +290,12 @@ components:
         - dueDate
         - id
     TasksList:
-      type: array
-      items:
-        $ref: "#/components/schemas/Task"
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+          $ref: "#/components/schemas/Task"
 
     Task:
       type: object
